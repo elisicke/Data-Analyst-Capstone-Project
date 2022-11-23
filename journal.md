@@ -11,4 +11,8 @@
 - Skill and interests ranking
 - first draft of timeline
 
+### open questions
+- where do we keep track of todos?
+- when access to data?
+
 - tomorrow: Hypothesis definition (assumptions and KPI ideas)
