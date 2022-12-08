@@ -67,7 +67,22 @@ GROUP BY account_key
 HAVING COUNT(DISTINCT user_agent) >= 20;
 --> 592 accounts
 
--- Accounts with more than 72 IP addresses and more than 20 different devices
+-- Accounts with more than 72 IP addresses AND more than 20 different devices
+
+SELECT COUNT (*) AS total_playbacks, COUNT(DISTINCT user_agent) AS cnt_devices, COUNT(DISTINCT ip_hash) AS cnt_ip, account_key
+FROM playbacks
+GROUP BY account_key
+HAVING COUNT(DISTINCT user_agent) >= 20 AND COUNT(DISTINCT ip_hash) >= 72
+ORDER BY total_playbacks DESC;
+--> List of accounts
+
+SELECT DISTINCT COUNT(*) OVER () AS TotalRecords
+FROM playbacks
+GROUP BY account_key
+HAVING COUNT(DISTINCT user_agent) >= 20 AND COUNT(DISTINCT ip_hash) >= 72;
+--> 25 accounts
+
+-- Accounts with more than 72 IP addresses OR more than 20 different devices
 
 SELECT COUNT (*) AS total_playbacks, COUNT(DISTINCT user_agent) AS cnt_devices, COUNT(DISTINCT ip_hash) AS cnt_ip, account_key
 FROM playbacks
@@ -80,18 +95,30 @@ SELECT DISTINCT COUNT(*) OVER () AS TotalRecords
 FROM playbacks
 GROUP BY account_key
 HAVING COUNT(DISTINCT user_agent) >= 20 OR COUNT(DISTINCT ip_hash) >= 72;
---> 25 accounts
+--> 602 accounts
 
--- Joining with Subscriptions to add info
+-- Testing inner join
 
-SELECT COUNT (*) AS total_playbacks, COUNT(DISTINCT pb.user_agent) AS cnt_devices, COUNT(DISTINCT pb.ip_hash) AS cnt_ip, pb.account_key, sb.subscription_type, sb.currency, sb.subscription_start 
+SELECT COUNT (*) AS total_playbacks, COUNT(DISTINCT pb.user_agent) AS cnt_devices, COUNT(DISTINCT pb.ip_hash) AS cnt_ip, pb.account_key 
 FROM playbacks pb
 INNER JOIN subscriptions sb
 	    ON pb.subscription_key = sb.subscription_key
-GROUP BY pb.account_key, sb.subscription_type, sb.currency, sb.subscription_start 
+GROUP BY pb.account_key 
 HAVING COUNT(DISTINCT pb.user_agent) >= 20 AND COUNT(DISTINCT pb.ip_hash) >= 72
 ORDER BY total_playbacks DESC;
---> List of accounts with info, only 16 rows??
+--> works: has also 25 rows
+
+
+-- Joining with Subscriptions to add info
+
+SELECT COUNT (*) AS total_playbacks, COUNT(DISTINCT pb.user_agent) AS cnt_devices, COUNT(DISTINCT pb.ip_hash) AS cnt_ip, pb.account_key, sb.subscription_type 
+FROM playbacks pb
+INNER JOIN subscriptions sb
+	    ON pb.subscription_key = sb.subscription_key
+GROUP BY pb.account_key, sb.subscription_type 
+HAVING COUNT(DISTINCT pb.user_agent) >= 20 AND COUNT(DISTINCT pb.ip_hash) >= 72
+ORDER BY total_playbacks DESC;
+--> List of accounts with info, if more grouping columns added why are there less rows now??
 
 -- Also joining with Accounts to add more infos
 
@@ -104,7 +131,7 @@ INNER JOIN accounts ac
 GROUP BY pb.account_key, sb.subscription_type, sb.currency, sb.subscription_start, ac.city_clean
 HAVING COUNT(DISTINCT pb.user_agent) >= 20 AND COUNT(DISTINCT pb.ip_hash) >= 72
 ORDER BY total_playbacks DESC;
---> List of accounts with more info
+--> List of accounts with more info -> only 16 rows!
 
 -- Looking deeper into one account
 
