@@ -70,13 +70,12 @@ HAVING COUNT(DISTINCT user_agent) >= 20;
 
 -- Accounts with more than 72 IP addresses and more than 20 different devices
 
-SELECT COUNT (*) AS total, account_key
+SELECT COUNT (*) AS total, COUNT(DISTINCT user_agent) AS cnt_devices, COUNT(DISTINCT ip_hash) AS cnt_ip, account_key
 FROM playbacks
 GROUP BY account_key
 HAVING COUNT(DISTINCT user_agent) >= 20 AND COUNT(DISTINCT ip_hash) >= 72
 ORDER BY total DESC;
---> List
-
+--> List of accounts
 
 SELECT DISTINCT COUNT(*) OVER () AS TotalRecords
 FROM playbacks
