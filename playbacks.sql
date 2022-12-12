@@ -123,14 +123,14 @@ HAVING COUNT(DISTINCT ip_hash) > 2
 ORDER BY ip_count DESC;
 --> List with 126 accounts
 
--- Accounts with more than 3 devices per DAY
+-- Accounts with more than 9 devices per DAY
 SELECT DATE_TRUNC('day', date_start) AS trunc_day, account_key, COUNT(DISTINCT user_agent) AS device_count, COUNT(*) AS playback_count
 FROM playbacks
 WHERE subscription_playback = 1
 GROUP BY account_key, trunc_day
-HAVING COUNT(DISTINCT user_agent) > 3
+HAVING COUNT(DISTINCT user_agent) > 9
 ORDER BY device_count DESC;
---> List with 16 accounts
+--> List with 0 accounts
 
 
 -- MONTH
