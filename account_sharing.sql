@@ -10,7 +10,7 @@ FROM playbacks p
 WHERE user_agent IS NULL;
 
 -- checking null values for devices 
-SELECT "playback_ID", device
+SELECT "playback_id", device
 FROM playbacks p
 WHERE device IS NULL;
 
@@ -24,18 +24,21 @@ SELECT COUNT(account_key)
 FROM accounts;
 
 SELECT COUNT(DISTINCT account_key)
-FROM playbacks;
---> 7875 accounts
+FROM playbacks
+WHERE subscription_playback = 1;
+--> 7759 accounts
 
 -- IP addresses per account
 SELECT COUNT(DISTINCT ip_hash) AS total, account_key 
 FROM playbacks
+WHERE subscription_playback = 1
 GROUP BY account_key
 ORDER BY total DESC;
 
 -- Average IP's per account
 SELECT account_key, COUNT(DISTINCT ip_hash) AS count_ip
 FROM playbacks
+WHERE subscription_playback = 1
 GROUP BY account_key
 ORDER BY count_ip DESC;
 --> List, turn into subquery:
@@ -43,21 +46,23 @@ ORDER BY count_ip DESC;
 SELECT ROUND(AVG(a.count_ip), 1) FROM
 (SELECT account_key, COUNT(DISTINCT ip_hash) AS count_ip
 FROM playbacks p
+WHERE subscription_playback = 1
 GROUP BY p.account_key) a;
---> 6.5 IP's per account on average
+--> 6.4 IP's per account on average
 
 
 -- Average devices per account
 SELECT ROUND(AVG(a.count_devices), 1) FROM
 (SELECT account_key, COUNT(DISTINCT user_agent) AS count_devices
 FROM playbacks p
+WHERE subscription_playback = 1
 GROUP BY p.account_key) a;
---> 7.1 devices per account on average
+--> 7.0 devices per account on average
 
 
 
 -- Accounts with more than 72 IP addresses 
-SELECT COUNT(DISTINCT ip_hash) AS total, account_key 
+SELECT COUNT(DISTINCT ip_hash) AS total, account_key
 FROM playbacks
 GROUP BY account_key
 HAVING COUNT(DISTINCT ip_hash) >= 72
@@ -66,9 +71,10 @@ ORDER BY total DESC;
 
 SELECT DISTINCT COUNT(*) OVER () AS TotalRecords
 FROM playbacks
+WHERE subscription_playback = 1
 GROUP BY account_key
 HAVING COUNT(DISTINCT ip_hash) >= 72;
---> 35 accounts
+--> 34 accounts
 
 
 -- Devices per account
@@ -81,6 +87,7 @@ ORDER BY total DESC;
 -- Accounts with more than 20 different devices
 SELECT COUNT(DISTINCT user_agent) AS total, account_key 
 FROM playbacks
+WHERE subscription_playback = 1
 GROUP BY account_key
 HAVING COUNT(DISTINCT user_agent) >= 20
 ORDER BY total DESC;
@@ -88,16 +95,26 @@ ORDER BY total DESC;
 
 SELECT DISTINCT COUNT(*) OVER () AS TotalRecords
 FROM playbacks
+WHERE subscription_playback = 1
 GROUP BY account_key
 HAVING COUNT(DISTINCT user_agent) >= 20;
---> 592 accounts
+--> 555 accounts
 
 
 SELECT DISTINCT COUNT(*) OVER () AS TotalRecords
 FROM playbacks
+WHERE subscription_playback = 1
 GROUP BY account_key
 HAVING COUNT(DISTINCT user_agent) >= 20 OR COUNT(DISTINCT ip_hash) >= 72;
---> 602 accounts
+--> 565 accounts
+
+SELECT DISTINCT COUNT(*) OVER () AS TotalRecords
+FROM playbacks
+WHERE subscription_playback = 1
+GROUP BY account_key
+HAVING COUNT(DISTINCT user_agent) >= 20 AND COUNT(DISTINCT ip_hash) >= 72;
+--> 24 accounts
+
 
 -- Testing inner join
 SELECT COUNT (*) AS total_playbacks, COUNT(DISTINCT pb.user_agent) AS cnt_devices, COUNT(DISTINCT pb.ip_hash) AS cnt_ip, pb.account_key 
@@ -107,7 +124,7 @@ INNER JOIN subscriptions sb
 GROUP BY pb.account_key 
 HAVING COUNT(DISTINCT pb.user_agent) >= 20 AND COUNT(DISTINCT pb.ip_hash) >= 72
 ORDER BY total_playbacks DESC;
---> works: has also 25 rows
+--> works: has also 24 rows
 
 
 -- Joining with Subscriptions to add info
@@ -237,7 +254,7 @@ HAVING COUNT(DISTINCT user_agent) > 15
 ORDER BY device_count DESC;
 --> 388 accounts
 
--- Accounts with more than 36 IP addresses AND more than 15 devices oer YEAR
+-- Accounts with more than 36 IP addresses AND more than 15 devices per YEAR
 SELECT DATE_TRUNC('year', date_start) AS trunc_month, account_key, COUNT(DISTINCT ip_hash) AS ip_count, COUNT(DISTINCT user_agent) AS devices_count
 FROM playbacks
 GROUP BY account_key, trunc_month
