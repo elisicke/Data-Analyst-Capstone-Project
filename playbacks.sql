@@ -47,6 +47,11 @@ FROM playbacks p
 WHERE subscription_playback = 1) AS a;
 --> 0.68 devices per account on average
 
+SELECT account_key, COUNT(DISTINCT user_agent) AS count_device
+FROM playbacks
+WHERE subscription_playback = 1
+GROUP BY account_key
+ORDER BY count_device DESC;
 
 -- Accounts with more than 72 IP addresses OVERALL with row count
 SELECT COUNT(DISTINCT ip_hash) AS total, account_key 
