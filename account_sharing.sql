@@ -43,11 +43,11 @@ GROUP BY account_key
 ORDER BY count_ip DESC;
 --> List, turn into subquery:
 
-SELECT ROUND(AVG(a.count_ip), 1) FROM
+SELECT ROUND(AVG(count_ip), 1) FROM
 (SELECT account_key, COUNT(DISTINCT ip_hash) AS count_ip
 FROM playbacks p
 WHERE subscription_playback = 1
-GROUP BY p.account_key) a;
+GROUP BY p.account_key) AS a;
 --> 6.4 IP's per account on average
 
 
@@ -221,13 +221,23 @@ HAVING COUNT(DISTINCT user_agent) > 10
 ORDER BY device_count DESC;
 --> 13 accounts
 
--- Accounts with more than 6 IP addresses AND more than 10 devices per MONTH 
+-- Accounts with more than 6 IP addresses AND more than 9 devices per MONTH 
 SELECT DATE_TRUNC('month', date_start) AS trunc_month, account_key, COUNT(DISTINCT ip_hash) AS ip_count, COUNT(DISTINCT user_agent) AS devices_count
 FROM playbacks
 GROUP BY account_key, trunc_month
-HAVING COUNT(DISTINCT ip_hash) > 6 AND COUNT(DISTINCT user_agent) >= 10
+HAVING COUNT(DISTINCT ip_hash) > 6 AND COUNT(DISTINCT user_agent) >= 9
 ORDER BY ip_count DESC;
---> 13 accounts
+--> 16 accounts
+
+-- Accounts with more than 6 IP addresses AND more than 10 devices per MONTH 
+SELECT COUNT(DISTINCT account_key)
+FROM (
+SELECT DATE_TRUNC('month', date_start) AS trunc_month, account_key, COUNT(DISTINCT ip_hash) AS ip_count, COUNT(DISTINCT user_agent) AS devices_count
+FROM playbacks
+GROUP BY account_key, trunc_month
+HAVING COUNT(DISTINCT ip_hash) > 6 AND COUNT(DISTINCT user_agent) >= 9
+ORDER BY ip_count DESC) AS x;
+--> 7 accounts
 
 -- Accounts with more than 6 IP addresses OR more than 10 devices per MONTH 
 SELECT DATE_TRUNC('month', date_start) AS trunc_month, account_key, COUNT(DISTINCT ip_hash) AS ip_count, COUNT(DISTINCT user_agent) AS device_count
@@ -312,4 +322,14 @@ GROUP BY account_key
 HAVING COUNT(DISTINCT ip_hash) >= 3
 ORDER BY movies_count DESC;
 --> stimmt noch nicht
+
+
+-- looking at user agents
+SELECT COUNT(DISTINCT user_agent)
+FROM playbacks;
+--> 6191 unique user agents 
+
+SELECT DISTINCT user_agent
+FROM playbacks
+ORDER BY user_agent;
 

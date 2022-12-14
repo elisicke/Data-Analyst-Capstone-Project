@@ -13,29 +13,39 @@ GROUP BY account_key
 ORDER BY total DESC;
 --> max. is 235 IP addresses per account
 
+-- OVERALL
+-- Average IP's per account OVERALL
+SELECT ROUND(SUM(count_ip) / SUM(count_account), 2) AS ip_avg
+FROM
+(SELECT COUNT(DISTINCT account_key) AS count_account, COUNT(DISTINCT ip_hash) AS count_ip
+FROM playbacks
+WHERE subscription_playback = 1) AS a;
+--> 4.79 IP's per account on average -> stimmt mit Tableau überein
+
+-- MONTH
 -- Average IP's per account
-SELECT account_key, COUNT(DISTINCT ip_hash) AS count_ip
+SELECT ROUND(SUM(count_ip) / SUM(count_account), 2) AS ip_avg
+FROM
+(SELECT DATE_TRUNC('month', date_start) AS trunc_month, COUNT(DISTINCT account_key) AS count_account, COUNT(DISTINCT ip_hash) AS count_ip
 FROM playbacks
 WHERE subscription_playback = 1
-GROUP BY account_key
-ORDER BY count_ip DESC;
---> List, turn into subquery:
+GROUP BY trunc_month) AS a;
+--> 1,45 IP's per account on average -> stimmt NICHT mit Tableau überein
 
-SELECT ROUND(AVG(a.count_ip), 1) FROM
-(SELECT account_key, COUNT(DISTINCT ip_hash) AS count_ip
-FROM playbacks p
+
+SELECT DATE_TRUNC('month', date_start) AS trunc_month, COUNT(DISTINCT account_key) AS count_account, COUNT(DISTINCT ip_hash) AS count_ip
+FROM playbacks
 WHERE subscription_playback = 1
-GROUP BY p.account_key) a;
---> 6.4 IP's per account on average
-
+GROUP BY trunc_month;
+--> List, how do I take average from here?
 
 -- Average devices per account
-SELECT ROUND(AVG(a.count_devices), 1) FROM
-(SELECT account_key, COUNT(DISTINCT user_agent) AS count_devices
+SELECT ROUND(SUM(count_devices) / SUM(count_account), 2) 
+FROM
+(SELECT COUNT(DISTINCT account_key) AS count_account, COUNT(DISTINCT user_agent) AS count_devices
 FROM playbacks p
-WHERE subscription_playback = 1
-GROUP BY p.account_key) a;
---> 7.0 devices per account on average
+WHERE subscription_playback = 1) AS a;
+--> 0.68 devices per account on average
 
 
 -- Accounts with more than 72 IP addresses OVERALL with row count
