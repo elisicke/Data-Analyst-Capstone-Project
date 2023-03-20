@@ -1,6 +1,6 @@
 -- ACCOUNT SHARING
 
---  GENERAL CHECKS:
+-- GENERAL CHECKS:
 -- checking null values ip and devices
 SELECT COUNT(*)
 FROM playbacks p 
@@ -43,7 +43,7 @@ GROUP BY account_key, trunc_month
 HAVING COUNT(DISTINCT ip_hash) > 6 AND COUNT(DISTINCT user_agent) >= 9
 ORDER BY ip_count DESC;
 
--- Accounts with more than 6 IP addresses OR more than 10 devices per MONTH 
+-- Accounts with more than 6 IP addresses OR more than 10 devices per MONTH (just for interest)
 SELECT DATE_TRUNC('month', date_start) AS trunc_month, account_key, COUNT(DISTINCT ip_hash) AS ip_count, COUNT(DISTINCT user_agent) AS device_count
 FROM playbacks
 GROUP BY account_key, trunc_month
