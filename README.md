@@ -60,7 +60,7 @@ In conducting our analysis, we initially explored the data generally to enhance 
 
 To facilitate our analysis, we categorized these KPIs into four broad themes, namely Users, Subscriptions, Vouchers and Gifted Subscriptions, and Account Sharing.
 
-**Disclaimer** Notebooks contain some of the EDA, while a significant portion was analyzed using Tableau. Regrettably, the latter cannot be shared due to data security concerns.
+**Disclaimer**: Notebooks contain some of the EDA, while a significant portion was analyzed using Tableau. Regrettably, the latter cannot be shared due to data security concerns.
 
 ## 4.1. Users
 To gain insights into user behavior, we conducted an analysis that included various factors, including:
